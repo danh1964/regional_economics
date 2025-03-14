@@ -1,0 +1,1050 @@
+---
+title: "Hội tụ năng suất lúa ở ĐBSCL"
+author: "Vo Thanh Danh"
+date: "2024-09-14"
+output:
+  html_document:
+    code_download: true
+    df_print: paged
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    toc_depth: 4
+    number_sections: true
+    code_folding: "show"
+    theme: "cosmo"
+    highlight: "monochrome"
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load_package, echo=FALSE}
+
+pacman::p_load(rio,
+               tidyverse,
+               REAT,
+               ggplot2,
+               here,      
+               kableExtra,
+               tidyverse, 
+               here)
+```
+
+
+# Load data md va tg_dist
+
+
+```{r dbscl, echo=FALSE}
+
+#  Goi/load file: md
+md <- import(here("gso", "md.xlsx"))
+tkmt_md <- summary(md) 
+tkmt_md 
+
+tg_dist <- import(here("gso", "tg_district.xlsx"))
+tg_dist %>% 
+  select(district, area_total, area_agr, pop, pop_rural) %>% 
+  group_by(district) %>% 
+  summary()
+
+```
+
+
+# Load data about ns cac vu dx-dx-ht-td
+
+
+```{r yiels_conv, echo=FALSE}
+# Goi dataframe
+ns_annual <- import(here("gso", "tg_ns_annual.xlsx")) # lua ca nam
+
+#
+ns_dx <- import(here("gso", "tg_ns_dx.xlsx")) # Dong Xuan
+
+#
+ns_ht <- import(here("gso", "tg_ns_ht.xlsx")) # He Thu
+
+#
+ns_td <- import(here("gso", "tg_ns_td.xlsx")) # Thu Dong
+
+#
+#
+# we prevent scientic notation of numbers 
+# in R and set a limit of 4 digits:
+options(scipen = 100, digits = 4)
+#
+
+```
+
+
+
+
+# THỰC TRẠNG SẢN XUẤT LÚA
+
+
+## Cả năm
+
+
+```{r lua_ca_nam, echo=FALSE}
+# a. tkmt
+tg_dist_ann <- tg_dist %>% 
+  select(district, annual_rice_area, annual_rice_yield, annual_rice_volumn) %>% 
+  group_by(district) %>% 
+  summary()
+tg_dist_ann
+
+# b. plot
+## a. chung 11 huyen
+ggplot(data = tg_dist)+
+  geom_boxplot(
+    mapping = aes(x = year, y = annual_rice_yield, fill = year),
+    width = 1, fill = "darkred")+
+  theme_minimal()+ # other specification for the geom
+  labs(
+    x = "Năm",
+    y = "Năng suất lúa cả năm- tạ/ha",
+    title = "Diễn biến năng suất lúa cả năm giai đoạn 1995-2022")
+#
+## b. phan theo huyen
+ggplot(data = tg_dist)+
+  geom_boxplot(
+    mapping = aes(x = year, y = annual_rice_yield, fill = year),
+    width = 1, fill = "darkred")+
+  theme_minimal()+ # other specification for the geom
+  labs(
+    x = "Năm",
+    y = "Năng suất lúa - tạ/ha",
+    title = "Diễn biến năng suất lúa cả năm - giai đoạn 1995-2022") +
+  facet_wrap(~district)        # Nhom theo tinh
+
+```
+
+## vụ Đông Xuân
+
+```{r dist_dx, echo=FALSE}
+# a. tkmt
+tg_dist_dx <- tg_dist %>% 
+  select(district, win_spr_rice_area, win_spr_rice_yield, win_spr_rice_volumn) %>% 
+  group_by(district) %>% 
+  summary()
+tg_dist_dx
+
+# plot
+## a. chung 11 huyen
+ggplot(data = tg_dist)+
+  geom_boxplot(
+    mapping = aes(x = year, y = win_spr_rice_yield, fill = year),
+    width = 1, fill = "darkred")+
+  theme_minimal()+ # other specification for the geom
+  labs(
+    x = "Năm",
+    y = "Năng suất lúa  vụ Đông Xuân - tạ/ha",
+    title = "Diễn biến năng suất lúa vụ Đông Xuân giai đoạn 1995-2022")
+#
+## b. phan theo huyen
+ggplot(data = tg_dist)+
+  geom_boxplot(
+    mapping = aes(x = year, y = win_spr_rice_yield, fill = year),
+    width = 1, fill = "darkred")+
+  theme_minimal()+ # other specification for the geom
+  labs(
+    x = "Năm",
+    y = "Năng suất lúa - tạ/ha",
+    title = "Diễn biến năng suất lúa vụ Đông Xuân - giai đoạn 1995-2022") +
+  facet_wrap(~district)        # Nhom theo tinh
+
+```
+
+
+
+## vụ Hè Thu
+
+
+```{r dist_ht, echo=FALSE}
+# a. tkmt
+tg_dist_ht <- tg_dist %>% 
+  select(district, sum_aut_rice_area, sum_aut_rice_yield, sum_aut_rice_volumn) %>% 
+  group_by(district) %>% 
+  summary()
+tg_dist_ht
+
+# b. plot
+## a. chung 11 huyen
+ggplot(data = tg_dist)+
+  geom_boxplot(
+    mapping = aes(x = year, y = sum_aut_rice_yield, fill = year),
+    width = 1, fill = "darkred")+
+  theme_minimal()+ # other specification for the geom
+  labs(
+    x = "Năm",
+    y = "Năng suất lúa  vụ Hè Thu - tạ/ha",
+    title = "Diễn biến năng suất lúa vụ Hè Thu giai đoạn 1995-2022")
+#
+## b. phan theo huyen
+ggplot(data = tg_dist)+
+  geom_boxplot(
+    mapping = aes(x = year, y = sum_aut_rice_yield, fill = year),
+    width = 1, fill = "darkred")+
+  theme_minimal()+ # other specification for the geom
+  labs(
+    x = "Năm",
+    y = "Năng suất lúa - tạ/ha",
+    title = "Diễn biến năng suất lúa vụ Hè Thu - giai đoạn 1995-2022") +
+  facet_wrap(~district)        # Nhom theo tinh
+
+```
+
+
+## vụ Thu Đông
+
+
+```{r dist_td, echo=FALSE}
+tg_dist_td <- tg_dist %>% 
+  select(district, aut_win_rice_area, aut_win_rice_yield, aut_win_rice_volumn) %>% 
+  group_by(district) %>% 
+  summary()
+tg_dist_td
+
+# b. plot
+## a. chung 11 huyen
+ggplot(data = tg_dist)+
+  geom_boxplot(
+    mapping = aes(x = year, y = aut_win_rice_yield, fill = year),
+    width = 1, fill = "darkred")+
+  theme_minimal()+ # other specification for the geom
+  labs(
+    x = "Năm",
+    y = "Năng suất lúa  vụ Thu Đông- tạ/ha",
+    title = "Diễn biến năng suất lúa vụ Thu Đông giai đoạn 1995-2022")
+#
+## b. phan theo huyen
+ggplot(data = tg_dist)+
+  geom_boxplot(
+    mapping = aes(x = year, y = aut_win_rice_yield, fill = year),
+    width = 1, fill = "darkred")+
+  theme_minimal()+ # other specification for the geom
+  labs(
+    x = "Năm",
+    y = "Năng suất lúa - tạ/ha",
+    title = "Diễn biến năng suất lúa vụ Thu Đông - giai đoạn 1995-2022") +
+  facet_wrap(~district)        # Nhom theo tinh
+
+```
+
+
+
+
+# PHÂN TÍCH HỘI TỤ NĂNG SUẤT LÚA 
+
+
+
+## Cả năm
+
+
+### test absolute beta convergence comparing the years 2009 and 2019:
+
+
+#### OLS
+
+
+```{r annual_yield, echo=FALSE}
+# absolute beta convergence comparing the years 2009 and 2019
+beta_ols_annual <- betaconv.ols (ns_annual$y2009, 2009, ns_annual$y2019, 2019,
+      conditions = NULL, 
+      print.results = T,
+      beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid"
+      )
+beta_ols_annual
+#
+
+```
+
+
+
+
+```{r}
+# Create a new column ln_initial = log(y1995)
+ln_initial <- ns_annual %>%
+  mutate(ln_initial = log(y2009))
+
+beta_ols_annual[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = ns_annual$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  theme_minimal() +
+  labs(subtitle = "Tang truong nang suat lua ca nam (%) (2009-2019)",
+       x = "Log of nang suat luas nam 2009",
+       y = "")
+```
+
+
+#### NLS
+
+
+
+```{r annual_yield_nls, echo=FALSE}
+# absolute beta convergence comparing the years 2009 and 2019
+beta_nls_annual <- betaconv.nls (ns_annual$y2009, 2009, ns_annual$y2019, 2019,
+      conditions = NULL, 
+      print.results = T,
+      beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid"
+      )
+beta_nls_annual
+#
+
+```
+
+
+
+
+```{r}
+# Create a new column ln_initial = log(y1995)
+ln_initial <- ns_annual %>%
+  mutate(ln_initial = log(y2009))
+
+beta_nls_annual[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = ns_annual$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  theme_minimal() +
+  labs(subtitle = "Tang truong nang suat lua ca nam (%) (2009-2019)",
+       x = "Log of nang suat luas nam 2009",
+       y = "")
+
+```
+
+
+
+
+
+### sigma convergence for two periods (ANOVA): 2009 vs 2019 
+
+```{r}
+#
+# check/test sigma convergence
+sigma_anova_sd_log_annual <- sigmaconv (ns_annual$y2009, 2009, ns_annual$y2019,
+                    2019, sigma.measure = "cv")
+# Using the coefficient of variation (CV)
+# Sigma convergence for two periods (ANOVA)
+sigma_anova_sd_log_annual
+#
+
+```
+
+
+### Sigma convergence for multiple periods (Trend regression) 
+
+
+```{r}
+sigma_trend_sd_log_annual <- sigmaconv.t(
+   ns_annual$y2009,
+      2009,
+   ns_annual[22:31],
+      2019,
+ sigma.measure = "sd",
+  sigma.log = TRUE) 
+sigma_trend_sd_log_annual
+  
+```
+
+
+### Linear trend regression
+
+
+```{r}
+sigma_trend_sd_log_annual[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth(method = lm) + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua ca nam)]",
+       x = "",
+       y = "")
+```
+
+
+
+### Non-linear trend regression
+
+```{r}
+sigma_trend_sd_log_annual[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth() + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua ca nam)]",
+       x = "",
+       y = "")
+```
+
+
+Note: An increasing dispersion implies a lack of sigma convergence
+
+
+
+
+### The analysis of sigma convergence uses trend regression
+
+
+```{r}
+sigma_plot <- rca (ns_annual$y2009, 2009, ns_annual[22:31], 2019,
+                   conditions = NULL, sigma.type = "trend", sigma.measure = "cv",
+                   beta.plot = TRUE, beta.plotLine = TRUE, beta.plotX =
+                     "Ln (Nang suat trung binh)", beta.plotY = "Ln (Tang nang suat trung binh)",
+                   beta.plotTitle = "Hoi tu Beta nang suat lua ca nam giai đoan 2009-2019",
+                   sigma.plot = TRUE, sigma.plotY = "cv cua ln (Nang suat lua)",
+                   sigma.plotTitle = "Hội tụ sigma năng suất lúa cả năm 2009-2019")
+sigma_plot
+#
+
+```
+
+
+
+### test if there are average growth differences between districts
+
+
+```{r}
+#
+# a. Tao dummy variable
+regionaldummies <- to.dummy(ns_annual$coastal)
+# b. Creating dummy variables for giáp biến vs. không giáp biển
+# regionaldummies[,1] = Giáp biển (1/0), regionaldummies[,2] = không giáp biển (1/0)
+ns_annual$coastal <- regionaldummies[,2]
+# 
+converg_annual <- rca (ns_annual$y2009, 2009,
+                        ns_annual[22:31], 2019, 
+                        conditions = ns_annual[c(36)],
+                        sigma.type = "trend")
+converg_annual
+
+```
+
+
+
+##  vụ Đông Xuân
+
+
+### test absolute beta convergence comparing the years 2009 and 2019:
+
+
+#### OLS
+
+
+```{r dx_yield, echo=FALSE}
+# absolute beta convergence comparing the years 2009 and 2019
+beta_ols_dx <- betaconv.ols (ns_dx$y2009, 2009, ns_dx$y2019, 2019,
+      conditions = NULL, 
+      print.results = T,
+      beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid"
+      )
+beta_ols_dx
+#
+
+```
+
+
+
+
+```{r}
+# Create a new column ln_initial = log(y1995)
+ln_initial <- ns_dx %>%
+  mutate(ln_initial = log(y2009))
+
+beta_ols_dx[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = ns_dx$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  theme_minimal() +
+  labs(subtitle = "Tang truong nang suat lua ca nam (%) (2009-2019)",
+       x = "Log of nang suat luas nam 2009",
+       y = "")
+```
+
+
+#### NLS
+
+
+
+```{r dx_yield_nls, echo=FALSE}
+# absolute beta convergence comparing the years 2009 and 2019
+beta_nls_dx <- betaconv.nls (ns_dx$y2009, 2009, ns_dx$y2019, 2019,
+      conditions = NULL, 
+      print.results = T,
+      beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid"
+      )
+beta_nls_dx
+#
+
+```
+
+
+
+
+```{r}
+# Create a new column ln_initial = log(y1995)
+ln_initial <- ns_dx %>%
+  mutate(ln_initial = log(y2009))
+
+beta_nls_dx[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = ns_dx$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  theme_minimal() +
+  labs(subtitle = "Tang truong nang suat lua ca nam (%) (2009-2019)",
+       x = "Log of nang suat luas nam 2009",
+       y = "")
+
+```
+
+
+
+
+
+### sigma convergence for two periods (ANOVA): 2009 vs 2019 
+
+```{r}
+#
+# check/test sigma convergence
+sigma_anova_sd_log_dx <- sigmaconv (ns_dx$y2009, 2009, ns_dx$y2019,
+                    2019, sigma.measure = "cv")
+# Using the coefficient of variation (CV)
+# Sigma convergence for two periods (ANOVA)
+sigma_anova_sd_log_dx
+#
+
+```
+
+
+### Sigma convergence for multiple periods (Trend regression) 
+
+
+```{r}
+sigma_trend_sd_log_dx <- sigmaconv.t(
+   ns_dx$y2009,
+      2009,
+   ns_dx[22:31],
+      2019,
+ sigma.measure = "sd",
+  sigma.log = TRUE) 
+sigma_trend_sd_log_dx
+  
+```
+
+
+### Linear trend regression
+
+
+```{r}
+sigma_trend_sd_log_dx[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth(method = lm) + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua ca nam)]",
+       x = "",
+       y = "")
+```
+
+
+
+### Non-linear trend regression
+
+```{r}
+sigma_trend_sd_log_dx[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth() + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua ca nam)]",
+       x = "",
+       y = "")
+```
+
+
+Note: An increasing dispersion implies a lack of sigma convergence
+
+
+
+
+### The analysis of sigma convergence uses trend regression
+
+
+```{r}
+sigma_plot <- rca (ns_dx$y2009, 2009, ns_dx[22:31], 2019,
+                   conditions = NULL, sigma.type = "trend", sigma.measure = "cv",
+                   beta.plot = TRUE, beta.plotLine = TRUE, beta.plotX =
+                     "Ln (Nang suat trung binh)", beta.plotY = "Ln (Tang nang suat trung binh)",
+                   beta.plotTitle = "Hoi tu Beta nang suat lua ca nam giai đoan 2009-2019",
+                   sigma.plot = TRUE, sigma.plotY = "cv cua ln (Nang suat lua)",
+                   sigma.plotTitle = "Hội tụ sigma năng suất lúa cả năm 2009-2019")
+sigma_plot
+#
+
+```
+
+
+
+### test if there are average growth differences between districts
+
+
+```{r}
+#
+# a. Tao dummy variable
+regionaldummies <- to.dummy(ns_dx$coastal)
+# b. Creating dummy variables for giáp biến vs. không giáp biển
+# regionaldummies[,1] = Giáp biển (1/0), regionaldummies[,2] = không giáp biển (1/0)
+ns_dx$coastal <- regionaldummies[,2]
+# 
+converg_dx <- rca (ns_dx$y2009, 2009,
+                        ns_dx[22:31], 2019, 
+                        conditions = ns_dx[c(36)],
+                        sigma.type = "trend")
+converg_dx
+
+```
+
+
+
+
+## Vụ Hè Thu
+
+
+### test absolute beta convergence comparing the years 2009 and 2019:
+
+
+#### OLS
+
+
+```{r ht_yield, echo=FALSE}
+# absolute beta convergence comparing the years 2009 and 2019
+beta_ols_ht <- betaconv.ols (ns_ht$y2009, 2009, ns_ht$y2019, 2019,
+      conditions = NULL, 
+      print.results = T,
+      beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid"
+      )
+beta_ols_ht
+#
+
+```
+
+
+
+
+```{r}
+# Create a new column ln_initial = log(y1995)
+ln_initial <- ns_ht %>%
+  mutate(ln_initial = log(y2009))
+
+beta_ols_ht[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = ns_ht$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  theme_minimal() +
+  labs(subtitle = "Tang truong nang suat lua ca nam (%) (2009-2019)",
+       x = "Log of nang suat luas nam 2009",
+       y = "")
+```
+
+
+#### NLS
+
+
+
+```{r ht_yield_nls, echo=FALSE}
+# absolute beta convergence comparing the years 2009 and 2019
+beta_nls_ht <- betaconv.nls (ns_ht$y2009, 2009, ns_ht$y2019, 2019,
+      conditions = NULL, 
+      print.results = T,
+      beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid"
+      )
+beta_nls_ht
+#
+
+```
+
+
+
+
+```{r}
+# Create a new column ln_initial = log(y1995)
+ln_initial <- ns_ht %>%
+  mutate(ln_initial = log(y2009))
+
+beta_nls_ht[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = ns_ht$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  theme_minimal() +
+  labs(subtitle = "Tang truong nang suat lua ca nam (%) (2009-2019)",
+       x = "Log of nang suat luas nam 2009",
+       y = "")
+
+```
+
+
+
+
+
+### sigma convergence for two periods (ANOVA): 2009 vs 2019 
+
+```{r}
+#
+# check/test sigma convergence
+sigma_anova_sd_log_ht <- sigmaconv (ns_ht$y2009, 2009, ns_ht$y2019,
+                    2019, sigma.measure = "cv")
+# Using the coefficient of variation (CV)
+# Sigma convergence for two periods (ANOVA)
+sigma_anova_sd_log_ht
+#
+
+```
+
+
+### Sigma convergence for multiple periods (Trend regression) 
+
+
+```{r}
+sigma_trend_sd_log_ht <- sigmaconv.t(
+   ns_ht$y2009,
+      2009,
+   ns_ht[22:31],
+      2019,
+ sigma.measure = "sd",
+  sigma.log = TRUE) 
+sigma_trend_sd_log_ht
+  
+```
+
+
+### Linear trend regression
+
+
+```{r}
+sigma_trend_sd_log_ht[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth(method = lm) + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua ca nam)]",
+       x = "",
+       y = "")
+```
+
+
+
+### Non-linear trend regression
+
+```{r}
+sigma_trend_sd_log_ht[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth() + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua ca nam)]",
+       x = "",
+       y = "")
+```
+
+
+Note: An increasing dispersion implies a lack of sigma convergence
+
+
+
+
+### The analysis of sigma convergence uses trend regression
+
+
+```{r}
+sigma_plot <- rca (ns_ht$y2009, 2009, ns_ht[22:31], 2019,
+                   conditions = NULL, sigma.type = "trend", sigma.measure = "cv",
+                   beta.plot = TRUE, beta.plotLine = TRUE, beta.plotX =
+                     "Ln (Nang suat trung binh)", beta.plotY = "Ln (Tang nang suat trung binh)",
+                   beta.plotTitle = "Hoi tu Beta nang suat lua ca nam giai đoan 2009-2019",
+                   sigma.plot = TRUE, sigma.plotY = "cv cua ln (Nang suat lua)",
+                   sigma.plotTitle = "Hội tụ sigma năng suất lúa cả năm 2009-2019")
+sigma_plot
+#
+
+```
+
+
+
+### test if there are average growth differences between districts
+
+
+```{r}
+#
+# a. Tao dummy variable
+regionaldummies <- to.dummy(ns_ht$coastal)
+# b. Creating dummy variables for giáp biến vs. không giáp biển
+# regionaldummies[,1] = Giáp biển (1/0), regionaldummies[,2] = không giáp biển (1/0)
+ns_ht$coastal <- regionaldummies[,2]
+# 
+converg_ht <- rca (ns_ht$y2009, 2009,
+                        ns_ht[22:31], 2019, 
+                        conditions = ns_ht[c(36)],
+                        sigma.type = "trend")
+converg_ht
+
+```
+
+
+
+
+## Vụ Thu Đông
+
+
+### test absolute beta convergence comparing the years 2009 and 2019:
+
+
+#### OLS
+
+
+```{r td_yield, echo=FALSE}
+# absolute beta convergence comparing the years 2009 and 2019
+beta_ols_td <- betaconv.ols (ns_td$y2009, 2009, ns_td$y2019, 2019,
+      conditions = NULL, 
+      print.results = T,
+      beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid"
+      )
+beta_ols_td
+#
+
+```
+
+
+
+
+```{r}
+# Create a new column ln_initial = log(y1995)
+ln_initial <- ns_td %>%
+  mutate(ln_initial = log(y2009))
+
+beta_ols_td[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = ns_td$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  theme_minimal() +
+  labs(subtitle = "Tang truong nang suat lua ca nam (%) (2009-2019)",
+       x = "Log of nang suat luas nam 2009",
+       y = "")
+```
+
+
+#### NLS
+
+
+
+```{r td_yield_nls, echo=FALSE}
+# absolute beta convergence comparing the years 2009 and 2019
+beta_nls_td <- betaconv.nls (ns_td$y2009, 2009, ns_td$y2019, 2019,
+      conditions = NULL, 
+      print.results = T,
+      beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid"
+      )
+beta_nls_td
+#
+
+```
+
+
+
+
+```{r}
+# Create a new column ln_initial = log(y1995)
+ln_initial <- ns_td %>%
+  mutate(ln_initial = log(y2009))
+
+beta_nls_td[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = ns_td$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  theme_minimal() +
+  labs(subtitle = "Tang truong nang suat lua ca nam (%) (2009-2019)",
+       x = "Log of nang suat luas nam 2009",
+       y = "")
+
+```
+
+
+
+
+
+### sigma convergence for two periods (ANOVA): 2009 vs 2019 
+
+```{r}
+#
+# check/test sigma convergence
+sigma_anova_sd_log_td <- sigmaconv (ns_td$y2009, 2009, ns_td$y2019,
+                    2019, sigma.measure = "cv")
+# Using the coefficient of variation (CV)
+# Sigma convergence for two periods (ANOVA)
+sigma_anova_sd_log_td
+#
+
+```
+
+
+### Sigma convergence for multiple periods (Trend regression) 
+
+
+```{r}
+sigma_trend_sd_log_td <- sigmaconv.t(
+   ns_td$y2009,
+      2009,
+   ns_td[22:31],
+      2019,
+ sigma.measure = "sd",
+  sigma.log = TRUE) 
+sigma_trend_sd_log_td
+  
+```
+
+
+### Linear trend regression
+
+
+```{r}
+sigma_trend_sd_log_td[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth(method = lm) + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua ca nam)]",
+       x = "",
+       y = "")
+```
+
+
+
+### Non-linear trend regression
+
+```{r}
+sigma_trend_sd_log_td[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth() + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua ca nam)]",
+       x = "",
+       y = "")
+```
+
+
+Note: An increasing dispersion implies a lack of sigma convergence
+
+
+
+
+### The analysis of sigma convergence uses trend regression
+
+
+```{r}
+sigma_plot <- rca (ns_td$y2009, 2009, ns_td[22:31], 2019,
+                   conditions = NULL, sigma.type = "trend", sigma.measure = "cv",
+                   beta.plot = TRUE, beta.plotLine = TRUE, beta.plotX =
+                     "Ln (Nang suat trung binh)", beta.plotY = "Ln (Tang nang suat trung binh)",
+                   beta.plotTitle = "Hoi tu Beta nang suat lua ca nam giai đoan 2009-2019",
+                   sigma.plot = TRUE, sigma.plotY = "cv cua ln (Nang suat lua)",
+                   sigma.plotTitle = "Hội tụ sigma năng suất lúa cả năm 2009-2019")
+sigma_plot
+#
+
+```
+
+
+
+### test if there are average growth differences between districts
+
+
+```{r}
+#
+# a. Tao dummy variable
+regionaldummies <- to.dummy(ns_td$coastal)
+# b. Creating dummy variables for giáp biến vs. không giáp biển
+# regionaldummies[,1] = Giáp biển (1/0), regionaldummies[,2] = không giáp biển (1/0)
+ns_td$coastal <- regionaldummies[,2]
+# 
+converg_td <- rca (ns_td$y2009, 2009,
+                        ns_td[22:31], 2019, 
+                        conditions = ns_td[c(36)],
+                        sigma.type = "trend")
+converg_td
+
+```
+
+
+
+
+
+
+
+END.
+
+
+
+
+
+
+
+

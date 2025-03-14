@@ -1,0 +1,460 @@
+---
+title: "Classical Sigma and Beta Convergence Analysis of rice yield for Mekong Delta:"
+subtitle: "Dong Xuan and He Thu-Thu Dong"
+author: "Vo Thanh Danh"
+output:
+  html_document:
+    code_download: true
+    df_print: paged
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    toc_depth: 4
+    number_sections: true
+    code_folding: "show"
+    theme: "cosmo"
+    highlight: "monochrome"
+  pdf_document: default
+  word_document: default
+---
+
+
+<style>
+h1.title {font-size: 18pt; color: DarkBlue;} 
+body, h1, h2, h3, h4 {font-family: "Palatino", serif;}
+body {font-size: 12pt;}
+/* Headers */
+h1,h2,h3,h4,h5,h6{font-size: 14pt; color: #00008B;}
+body {color: #333333;}
+a, a:hover {color: #8B3A62;}
+pre {font-size: 12px;}
+</style>
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+pacman::p_load(rio,
+               tidyverse,
+               REAT,
+               ConvergenceClubs,
+               here)
+
+options(prompt="R> ", digits=4, scipen=999)
+```
+
+
+
+# Load the Data
+
+
+
+```{r load_data, echo=FALSE}
+# Goi dataframe
+md_dx <- import(here("weiland", "gso", "ns_dx_1.xlsx"))
+md_ht <- import(here("weiland", "gso", "ns_ht_1.xlsx"))
+
+```
+
+
+
+# Vu Dong Xuan
+
+
+## Sigma convergence for two periods (ANOVA): 1995 and 2023 
+
+
+```{r}
+sigma_anova_sd_log_dx <- sigmaconv(
+          md_dx$y1995,
+          1995,
+          md_dx$y2023,
+          2023,
+          sigma.measure = "sd",
+          sigma.log = TRUE) 
+sigma_anova_sd_log_dx
+
+```
+
+
+
+## Sigma convergence for multiple periods (Trend regression) 
+
+
+
+```{r}
+sigma_trend_sd_log_dx <- sigmaconv.t(
+   md_dx$y1995,
+      1995,
+   md_dx[3:30],
+      2023,
+ sigma.measure = "sd",
+  sigma.log = TRUE) 
+sigma_trend_sd_log_dx
+  
+```
+
+
+
+## Linear trend regression
+
+
+```{r}
+sigma_trend_sd_log_dx[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth(method = lm) + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua vu Dong Xuan)]",
+       x = "",
+       y = "")
+```
+
+
+
+## Non-linear trend regression
+
+```{r}
+sigma_trend_sd_log_dx[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth() + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua vu Dong Xuan)]",
+       x = "",
+       y = "")
+```
+
+
+Note: An increasing dispersion implies a lack of sigma convergence
+
+
+
+
+
+## The analysis of sigma convergence uses trend regression
+
+
+```{r}
+sigma_plot <- rca (md_dx$y1995, 1995, md_dx[3:30], 2023,
+                   conditions = NULL, sigma.type = "trend", sigma.measure = "cv",
+                   beta.plot = TRUE, beta.plotLine = TRUE, beta.plotX =
+                     "Ln (Nang suat trung binh)", beta.plotY = "Ln (Tang nang suat trung binh)",
+                   beta.plotTitle = "Hoi tu Beta nang suat lua vu Dong Xuan giai đoan 2009-2019",
+                   sigma.plot = TRUE, sigma.plotY = "cv cua ln (Nang suat lua)",
+                   sigma.plotTitle = "Hội tụ sigma năng suất lúa cả năm 2009-2019")
+sigma_plot
+#
+
+```
+
+
+
+## test if there are average growth differences between provinces
+
+
+```{r}
+#
+# a. Tao dummy variable
+regionaldummies <- to.dummy(md_dx$Province)
+# b. Creating dummy variables for giáp biến vs. không giáp biển
+# regionaldummies[,1] = Giáp biển (1/0), regionaldummies[,2] = không giáp biển (1/0)
+md_dx$Province <- regionaldummies[,2]
+# 
+converg_dx <- rca (md_dx$y1995, 1995,
+                        md_dx[3:30], 2023, 
+                        conditions = md_dx[c(31, 32)],
+                        sigma.type = "trend")
+converg_dx
+
+```
+
+
+
+## Beta convergence: 1995-2023 period
+
+
+### OLS
+
+
+```{r}
+betaconv_ols_dx <- betaconv.ols (md_dx$y1995,
+              1995,
+              md_dx$y2023,
+              2023,
+              conditions = NULL, 
+              beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid",
+              # output.results = TRUE
+              )
+betaconv_ols_dx
+
+```
+
+
+ Linear beta-convergence regression 
+
+
+```{r}
+# Create a new column ln_initial = log(y1995)
+ln_initial <- md_dx %>%
+  mutate(ln_initial = log(y1995))
+
+betaconv_ols_dx[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = md_dx$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  theme_minimal() +
+  labs(subtitle = "Growth of rice yield (1995-2023)",
+       x = "Log of rice yield in 1995",
+       y = "")
+```
+
+
+### NLS
+
+
+```{r}
+betaconv_nls_dx <- betaconv.ols (md_dx$y1995,
+              1995,
+              md_dx$y2023,
+              2023,
+              conditions = NULL, 
+              beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid",
+              # output.results = TRUE
+              )
+betaconv_nls_dx
+
+```
+
+
+
+```{r}
+betaconv_nls_dx[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = md_dx$growth)) +
+  geom_point() +
+  geom_smooth() +
+  theme_minimal() +
+  labs(subtitle = "Growth of rice yield (1995-2023)",
+       x = "Log of rice yield in 1995",
+       y = "")
+```
+
+
+Note: The lack of statistical significance of the beta coefficient implies a lack of beta convergence
+
+
+
+
+
+
+
+# Vu He Thu - Thu Dong
+
+
+## Sigma convergence for two periods (ANOVA): 1995 and 2023 
+
+
+```{r}
+sigma_anova_sd_log_ht <- sigmaconv(
+          md_ht$y1995,
+          1995,
+          md_ht$y2023,
+          2023,
+          sigma.measure = "sd",
+          sigma.log = TRUE)
+sigma_anova_sd_log_ht          
+```
+
+
+
+## Sigma convergence for multiple periods (Trend regression) 
+ 
+
+```{r}
+sigma_trend_sd_log_ht <- sigmaconv.t(
+   md_ht$y1995,
+      1995,
+   md_ht[3:30],
+      2023,
+ sigma.measure = "sd",
+  sigma.log = TRUE) 
+sigma_trend_sd_log_ht
+  
+```
+
+## Linear trend regression
+
+```{r}
+sigma_trend_sd_log_ht[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth(method = lm) + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua vu Dong Xuan)]",
+       x = "",
+       y = "")
+```
+
+## Non-linear trend regression
+
+```{r}
+sigma_trend_sd_log_ht[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth() + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(Nang suat lua vu Dong Xuan)]",
+       x = "",
+       y = "")
+```
+
+
+Note: An increasing dispersion implies a lack of sigma convergence
+
+
+
+
+## The analysis of sigma convergence uses trend regression
+
+
+```{r}
+sigma_plot <- rca (md_ht$y1995, 1995, md_ht[3:30], 2023,
+                   conditions = NULL, sigma.type = "trend", sigma.measure = "cv",
+                   beta.plot = TRUE, beta.plotLine = TRUE, beta.plotX =
+                     "Ln (Nang suat trung binh)", beta.plotY = "Ln (Tang nang suat trung binh)",
+                   beta.plotTitle = "Hoi tu Beta nang suat lua vu Dong Xuan giai đoan 2009-2019",
+                   sigma.plot = TRUE, sigma.plotY = "cv cua ln (Nang suat lua)",
+                   sigma.plotTitle = "Hội tụ sigma năng suất lúa cả năm 2009-2019")
+sigma_plot
+#
+
+```
+
+
+
+## test if there are average growth differences between provinces
+
+
+```{r}
+#
+# a. Tao dummy variable
+regionaldummies <- to.dummy(md_ht$Province)
+# b. Creating dummy variables for giáp biến vs. không giáp biển
+# regionaldummies[,1] = Giáp biển (1/0), regionaldummies[,2] = không giáp biển (1/0)
+md_ht$Province <- regionaldummies[,2]
+# 
+converg_ht <- rca (md_ht$y1995, 1995,
+                        md_ht[3:30], 2023, 
+                        conditions = md_ht[c(31, 32)],
+                        sigma.type = "trend")
+converg_ht
+
+```
+
+
+
+
+
+## Beta convergence: 1995-2023 period
+
+
+### OLS
+
+
+```{r}
+betaconv_ols_ht <- betaconv.ols (md_ht$y1995,
+              1995,
+              md_ht$y2023,
+              2023,
+              conditions = NULL, 
+              beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid"
+              )
+betaconv_ols_ht
+```
+
+
+
+```{r}
+# Create a new column ln_initial = log(y1995)
+ln_initial <- md_ht %>%
+  mutate(ln_initial = log(y1995))
+
+betaconv_ols_ht[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = md_ht$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  theme_minimal() +
+  labs(subtitle = "Growth of rice yield (1995-2023)",
+       x = "Log of rice yield in 1995",
+       y = "")
+```
+
+
+
+### NLS
+
+
+
+```{r}
+betaconv_nls_ht <- betaconv.ols (md_ht$y1995,
+              1995,
+              md_ht$y2023,
+              2023,
+              conditions = NULL, 
+              beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid"
+              )
+betaconv_nls_ht
+```
+
+
+
+```{r}
+betaconv_nls_ht[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = md_ht$growth)) +
+  geom_point() +
+  geom_smooth() +
+  theme_minimal() +
+  labs(subtitle = "Growth of rice yield (1995-2023)",
+       x = "Log of rice yield in 1995",
+       y = "")
+```
+
+
+Note: The lack of statistical significance of the beta coefficient implies a lack of beta convergence
+
+
+
+
+
+END.

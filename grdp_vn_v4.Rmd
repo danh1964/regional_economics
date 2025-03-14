@@ -1,0 +1,456 @@
+---
+title: "Phan tich hoi tu GRDP/nguoi"
+subtitle: "ca nuoc - 63 tinh/thanh"
+author: "Vo Thanh Danh"
+output:
+  html_document:
+    code_download: true
+    df_print: paged
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    toc_depth: 4
+    number_sections: true
+    code_folding: "show"
+    theme: "cosmo"
+    highlight: "monochrome"
+  pdf_document: default
+  word_document: default
+---
+
+
+<style>
+h1.title {font-size: 18pt; color: DarkBlue;} 
+body, h1, h2, h3, h4 {font-family: "Palatino", serif;}
+body {font-size: 12pt;}
+/* Headers */
+h1,h2,h3,h4,h5,h6{font-size: 14pt; color: #00008B;}
+body {color: #333333;}
+a, a:hover {color: #8B3A62;}
+pre {font-size: 12px;}
+</style>
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+pacman::p_load(rio,
+               tidyverse,
+               REAT,
+               ConvergenceClubs,
+               here)
+
+options(prompt="R> ", digits=4, scipen=999)
+```
+
+
+
+# Load the Data
+
+
+
+
+```{r load_data, echo=TRUE}
+# Goi dataframe
+grdp <- import(here("gso", "grdp_vn.xlsx"))
+
+
+```
+
+
+
+# Phân tích tương quan và đồ thị phase
+
+
+## Phân tích tương quan giữa mean va độ lệch chuẩn của biến grdp để xác định xu hướng hội tụ hay phân kỳ
+
+A. VỀ HỘI TỤ HAY PHÂN KỲ:
+
+•	Hội tụ thu nhập: Nếu một quốc gia hoặc khu vực có mean thấp nhưng độ lệch chuẩn cao, có thể chỉ ra rằng thu nhập bình quân đầu người của quốc gia đó đang có xu hướng hội tụ về mức thu nhập trung bình toàn cầu hoặc khu vực, nhưng mức độ phân hóa thu nhập vẫn còn lớn. Khi có sự giảm bớt sự phân hóa (độ lệch chuẩn giảm), đó có thể là dấu hiệu của hội tụ kinh tế.
+
+
+•	Phân kỳ thu nhập: Ngược lại, nếu mean cao và độ lệch chuẩn cũng cao, có thể chỉ ra rằng mức thu nhập ở quốc gia đó đang phân tán và có sự phân kỳ (sự khác biệt về mức thu nhập giữa các khu vực hoặc quốc gia ngày càng lớn).
+
+
+
+B. VỀ MỐI QUAN HỆ GIỮA Mean VÀ Độ lệch chuẩn: 
+
+1.	Nếu mean cao nhưng độ lệch chuẩn cũng cao, điều này có thể cho thấy một nhóm có grdp/người cao, nhưng sự phân hóa grdp/người cũng rất lớn. Ví dụ: có tỉnh có grdp/người cao và cũng có nhiều tỉnh có grdp/người thấp.
+
+2.	Nếu mean cao nhưng độ lệch chuẩn thấp, có thể nhóm này có grdp/người cao và khá đồng đều (không có sự phân hóa lớn).
+
+3.	Nếu mean thấp và độ lệch chuẩn cũng thấp, có thể cho thấy grdp/người trung bình của nhóm này thấp và đồng đều.
+
+4.	Nếu mean thấp nhưng độ lệch chuẩn cao, có thể có sự phân hóa grdp/người rõ rệt trong một nhóm có grdp/người thấp.
+
+
+C. Phân tích đồ thị (1) 
+
+
+D. Phân tích đồ thị(2):
+
+1. Xu hướng chung: Xem xét xu hướng của cả giá trị trung bình và độ lệch chuẩn. Ví dụ: nếu giá trị trung bình tăng lên và độ lệch chuẩn giảm xuống, điều này cho thấy sự phát triển và hội tụ đồng thời.
+
+2. Giai đoạn phân kỳ và hội tụ: Phân tích xem có giai đoạn nào mà độ lệch chuẩn tăng lên (phân kỳ) trước khi giảm xuống (hội tụ) hay không. Điều này có thể cho thấy một quá trình chuyển đổi phức tạp, trong đó ban đầu có sự khác biệt ngày càng tăng, sau đó là sự hội tụ. Ví dụ, đối với trình độ dân trí, giai đoạn đầu có thể là phân kỳ, khi trình độ dân trí tăng lên nhưng độ phân tán cũng tăng. Sau khi đạt đến một mức nhất định (ví dụ: 0.5), độ phân tán bắt đầu giảm khi trình độ dân trí của các nhóm thu nhập và phát triển con người khác nhau hội tụ về giá trị tối đa.
+
+3. So sánh giữa các nhóm: So sánh đồ thị giữa các nhóm quốc gia khác nhau (ví dụ: theo thu nhập hoặc HDI ban đầu) để xem nhóm nào đang hội tụ nhanh hơn hoặc bị "mắc kẹt". Ví dụ: đồ thị về GDP bình quân đầu người có thể cho thấy các nhóm có thu nhập cao hơn hội tụ, trong khi nhóm có thu nhập thấp nhất bị "mắc kẹt".
+
+4. Các yếu tố ảnh hưởng: Xem xét các yếu tố kinh tế, xã hội và chính trị có thể ảnh hưởng đến xu hướng hội tụ hoặc phân kỳ. Ví dụ, đô thị hóa có thể là một yếu tố quan trọng thúc đẩy hội tụ.
+
+Tóm lại, đồ thị tương quan giữa giá trị trung bình và độ lệch chuẩn là một công cụ hữu ích để hình dung và phân tích các xu hướng hội tụ và phân kỳ trong phát triển kinh tế và xã hội, cũng như để so sánh hiệu quả phát triển giữa các nhóm quốc gia khác nhau.
+
+
+
+```{r}
+pacman::p_load(dplyr, gglot2)
+
+ggplot(data = grdp)+
+  geom_line(
+    mapping = aes(x = mean_grdp, y = sd_grdp, fill = zone),
+    width = 1, fill = "darkred")+
+  facet_wrap(~ zone) +
+  theme_minimal()+ # other specification for the geom
+  labs(title = "Correlation between Mean and Standard Deviation of grdp by economic zone",
+       x = "Mean of grdp/nguoi",
+       y = "Standard Deviation of grdp/nguoi",
+       color = "zone") +
+  theme_minimal()
+ 
+```
+
+
+
+## Phân tích đồ thị pha
+
+
+
+Đồ thị pha là một công cụ mạnh mẽ để *phân tích động lực phát triển theo thời gian*, *xác định các giai đoạn chuyển đổi*, và *so sánh hiệu quả phát triển* giữa các quốc gia và khu vực khác nhau
+
+
+
+Đồ thị pha (phase diagram) là một công cụ trực quan được sử dụng để phân tích sự hội tụ và phân kỳ trong phát triển kinh tế và xã hội theo thời gian. Đồ thị này thể hiện mối quan hệ giữa mức độ của một chỉ số (ví dụ: trình độ dân trí, GDP bình quân đầu người, tuổi thọ) ở một thời điểm nhất định (trục x) và sự thay đổi của chỉ số đó trong một khoảng thời gian nhất định (thường là một thập kỷ) (trục y).
+
+
+Cách đọc và giải thích đồ thị pha:
+
+• Trục x: Thể hiện mức độ ban đầu của chỉ số đang xét. Ví dụ, trong đồ thị pha về grdp/người, trục x thể hiện grdp/người vào đầu thập kỷ.
+
+• Trục y: Thể hiện sự thay đổi của chỉ số đó trong một khoảng thời gian nhất định (ví dụ: một thập kỷ). Ví dụ, trong đồ thị pha về grdp/người, trục y thể hiện sự thay đổi về grdp/người trong thập kỷ đó.
+
+• Các điểm dữ liệu: Mỗi điểm trên đồ thị đại diện cho một quốc gia hoặc một nhóm quốc gia. Vị trí của điểm cho biết mức độ ban đầu của chỉ số (e.g., grdp/người) và sự thay đổi của nó trong thập kỷ đó.
+
+• Đường xu hướng (trend lines): Các đường này cho thấy xu hướng chung của sự thay đổi đối với các nhóm quốc gia khác nhau.
+
+
+
+CÁCH GIẢI THÍCH Hội tụ và phân kỳ:
+
+Hội tụ: Nếu các điểm dữ liệu có xu hướng tập trung về một mức độ thu nhập nhất định trên trục x, điều này cho thấy sự hội tụ. Các quốc gia có mức độ thu nhập ban đầu thấp hơn có xu hướng tăng nhanh hơn, trong khi các quốc gia có mức độ thu nhập ban đầu cao hơn có xu hướng tăng chậm hơn.
+
+Phân kỳ: Nếu các điểm dữ liệu có xu hướng phân tán ra xa nhau, điều này cho thấy sự phân kỳ. Các quốc gia có mức độ ban đầu khác nhau có xu hướng đi theo các quỹ đạo khác nhau, dẫn đến sự khác biệt ngày càng tăng.
+
+Các giai đoạn chuyển đổi: Đồ thị pha có thể cho thấy các giai đoạn chuyển đổi khác nhau trong quá trình phát triển. Ví dụ, một chỉ số có thể trải qua giai đoạn phân kỳ ban đầu, sau đó là giai đoạn hội tụ khi các quốc gia khác nhau đạt đến một mức độ phát triển nhất định.
+
+
+
+• Ảnh hưởng của các sự kiện: Thí dụ: Các sự kiện lớn như chiến tranh, dịch bệnh (ví dụ: HIV/AIDS), hoặc thay đổi chính sách có thể ảnh hưởng đáng kể đến quỹ đạo phát triển của một quốc gia hoặc khu vực, và được thể hiện trên đồ thị pha. Ví dụ, đồ thị pha về tuổi thọ có thể cho thấy tác động tiêu cực của dịch HIV/AIDS ở khu vựcSub-Saharan Africa.
+
+
+### Phân theo 6 vùng
+
+
+```{r phase_diagram, echo=FALSE}
+install.packages("ggrepel")  # Hiển thị nhãn rõ hơn
+library(ggrepel)
+
+# BƯỚC 1: Tính tốc độ tăng trưởng GDP
+# Lấy từ biến "growth"
+
+# BƯỚC 2: Vẽ đồ thị pha 
+ggplot(grdp, aes(x = y2018, y = growth, label = zone)) +
+  geom_line(aes(color = zone), size = 1) +  
+  geom_smooth(method = "loess", se = FALSE, color = "blue", linetype = "dashed") +  # Đường xu hướng
+  #geom_text_repel(size = 3, max.overlaps = 10) +  # Nhãn dữ liệu
+  scale_x_log10() +  # Dùng log GDP nếu cần
+  labs(
+    title = "Phase Diagram of GRDP Growth",
+    x = "GDP per Capita (năm 2018)",
+    y = "GDP Growth Rate (%)"
+  ) +
+  theme_minimal()
+
+```
+
+
+### Phân theo mật độ doanh nghiệp 
+
+Là 1 nếu lớn hơn 100 DN/vạn dân
+
+
+Là 0 nếu nhỏ hơn 100 DN/vạn dân
+
+
+
+```{r}
+ggplot(grdp, aes(x = y2018, y = growth, label = mat_do_dn)) +
+  geom_line(aes(color = mat_do_dn), size = 1) +  
+  geom_smooth(method = "loess", se = FALSE, color = "blue", linetype = "dashed") +  # Đường xu hướng
+  geom_text_repel(size = 3, max.overlaps = 10) +  # Nhãn dữ liệu
+  scale_x_log10() +  # Dùng log GDP nếu cần
+  labs(
+    title = "Phase Diagram of GRDP Growth",
+    x = "GDP per Capita (năm 2018)",
+    y = "GDP Growth Rate (%)"
+  ) +
+  theme_minimal()
+
+```
+
+
+
+### Phân theo quy mô FDI 
+
+Là 1 nếu lớn hơn 1 tỷ USD
+
+
+Là 0 nếu nhỏ hơn 1 tỷ USD
+
+
+
+```{r}
+ggplot(grdp, aes(x = y2018, y = growth, label = fdi_1)) +
+  geom_line(aes(color = fdi_1), size = 1) +  
+  geom_smooth(method = "loess", se = FALSE, color = "blue", linetype = "dashed") +  # Đường xu hướng
+  geom_text_repel(size = 3, max.overlaps = 10) +  # Nhãn dữ liệu
+  scale_x_log10() +  # Dùng log GDP nếu cần
+  labs(
+    title = "Phase Diagram of GRDP Growth",
+    x = "GDP per Capita (năm 2018)",
+    y = "GDP Growth Rate (%)"
+  ) +
+  theme_minimal()
+
+```
+
+
+
+# Phân tích hội tụ beta
+
+
+## Beta convergence: 2018-2023 period
+
+
+### OLS
+
+
+```{r}
+betaconv_ols <- betaconv.ols (grdp$y2018,
+              2018,
+              grdp$y2023,
+              2023,
+              conditions = NULL, 
+              beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid",
+              # output.results = TRUE
+              )
+betaconv_ols
+
+```
+
+
+#### Đò thị: Linear beta-convergence regression 
+
+
+```{r}
+# Create a new column ln_initial = log(y2018)
+ln_initial <- grdp %>%
+  mutate(ln_initial = log(y2018))
+
+betaconv_ols[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = grdp$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+theme_minimal() +
+labs(subtitle = "Growth of grdp (%) (2018-2023)",
+   x = "Log of GRDP/nguoi in 2018",
+   y = "Growth ò GRDP/nguoi")
+
+```
+
+
+### NLS
+
+
+```{r}
+betaconv_nls <- betaconv.ols (grdp$y2018,
+              2018,
+              grdp$y2023,
+              2023,
+              conditions = NULL, 
+              beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid",
+              # output.results = TRUE
+              )
+betaconv_nls
+
+```
+
+
+#### Đò thị: non-linear beta-convergence regression 
+
+
+```{r}
+betaconv_nls[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = grdp$growth)) +
+  geom_point() +
+  geom_smooth() +
+  theme_minimal() +
+  labs(subtitle = "Growth of GRDP/nguoi (2018-2023)",
+       x = "Log of GRDP/nguoi nam 2018",
+       y = "")
+```
+
+
+
+# Phân tích hội tụ sigma
+
+
+## Sigma convergence for two periods (ANOVA): 2018 and 2023 
+
+
+```{r}
+sigma_anova_sd_log <- sigmaconv(
+          grdp$y2018,
+          2018,
+          grdp$y2023,
+          2023,
+          sigma.measure = "sd",
+          sigma.log = TRUE
+          ) 
+sigma_anova_sd_log
+
+```
+
+
+
+## Sigma convergence for multiple periods (Trend regression) 
+
+
+
+```{r}
+sigma_trend_sd_log <- sigmaconv.t(
+   grdp$y2018,
+      2018,
+   grdp[3:7],
+      2023,
+ sigma.measure = "sd",
+  sigma.log = TRUE) 
+sigma_trend_sd_log
+  
+```
+
+
+
+## Đồ thị: Linear trend regression
+
+
+```{r}
+sigma_trend_sd_log[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth(method = lm) + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(GRDP/nguoi)]",
+       x = "",
+       y = "")
+```
+
+
+
+## Đồ thị: non-linear trend regression
+
+
+```{r}
+sigma_trend_sd_log[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth() + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(GRDP/nguoi)]",
+       x = "",
+       y = "")
+```
+
+
+Note: An increasing dispersion implies a lack of sigma convergence
+
+
+
+# Phân tích chung cả hộ tụ beta và hội tụ sigma
+
+
+## The analyses of sigma ang beta convergences use trend regression
+
+
+
+```{r}
+sigma_plot <- rca (grdp$y2018, 2018, grdp[3:7], 2023,
+                   conditions = NULL, sigma.type = "trend", sigma.measure = "cv",
+                   beta.plot = TRUE, beta.plotLine = TRUE, beta.plotX =
+                     "Ln (GRDP/nguoi trung inh)", beta.plotY = "Ln (% tang GRDP/nguoi )",
+                   beta.plotTitle = "Hoi tu Beta GRDP/nguoi giai đoan 2018-2023",
+                   sigma.plot = TRUE, sigma.plotY = "cv cua ln (GRDP/nguoi)",
+                   sigma.plotTitle = "Hội tụ sigma GRDP/nguoi năm 2018-2023")
+sigma_plot
+#
+
+```
+
+
+
+# Phân tích hội tụ có điều kiện
+
+test if there are average growth differences by mat do doanh nghiep, nsld, FDI, hdi
+
+
+```{r}
+
+# a. Tao dummy variable
+regionaldummies <- to.dummy(grdp$mat_do_dn)
+# b. Creating dummy variables for anh huong cua bien so dn/van dan den hoi tu GRDP/nguoi
+# regionaldummies[,1] = cao (>=1), 
+# regionaldummies[,2] = thap (<1)
+grdp$mat_do_dn_van_ld <- regionaldummies[,2]
+# # #
+converg_grdp <- rca (grdp$y2018, 2018,
+                          grdp[3:7], 2023,
+                          conditions = grdp[c(16, 19, 20, 26)], # 16, 19, 20, 26 la vi tri cua cacs cot "maty_do_dn_van_ld, ....)
+                          sigma.type = "trend")
+  converg_grdp
+
+```
+
+
+
+
+# KẾT LUẬN
+
+- ![] (gso/ket_luan.pdf)
+
+
+
+END.

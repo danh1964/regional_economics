@@ -1,0 +1,283 @@
+---
+title: "Phan tich hoi tu GRDP/nguoi"
+subtitle: "ca nuoc - 63 tinh/thanh"
+author: "Vo Thanh Danh"
+output:
+  html_document:
+    code_download: true
+    df_print: paged
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    toc_depth: 4
+    number_sections: true
+    code_folding: "show"
+    theme: "cosmo"
+    highlight: "monochrome"
+  pdf_document: default
+  word_document: default
+---
+
+
+<style>
+h1.title {font-size: 18pt; color: DarkBlue;} 
+body, h1, h2, h3, h4 {font-family: "Palatino", serif;}
+body {font-size: 12pt;}
+/* Headers */
+h1,h2,h3,h4,h5,h6{font-size: 14pt; color: #00008B;}
+body {color: #333333;}
+a, a:hover {color: #8B3A62;}
+pre {font-size: 12px;}
+</style>
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+pacman::p_load(rio,
+               tidyverse,
+               REAT,
+               ConvergenceClubs,
+               here)
+
+options(prompt="R> ", digits=4, scipen=999)
+```
+
+
+
+# Load the Data
+
+
+
+
+```{r load_data, echo=FALSE}
+# Goi dataframe
+grdp <- import(here("gso", "grdp_vn.xlsx"))
+
+
+```
+
+
+
+
+
+
+# Sigma convergence for two periods (ANOVA): 2018 and 2023 
+
+
+```{r}
+sigma_anova_sd_log <- sigmaconv(
+          grdp$y2018,
+          2018,
+          grdp$y2023,
+          2023,
+          sigma.measure = "sd",
+          sigma.log = TRUE
+          ) 
+sigma_anova_sd_log
+
+```
+
+
+
+# Sigma convergence for multiple periods (Trend regression) 
+
+
+
+```{r}
+sigma_trend_sd_log <- sigmaconv.t(
+   grdp$y2018,
+      2018,
+   grdp[3:7],
+      2023,
+ sigma.measure = "sd",
+  sigma.log = TRUE) 
+sigma_trend_sd_log
+  
+```
+
+
+
+# Linear trend regression
+
+
+```{r}
+sigma_trend_sd_log[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth(method = lm) + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(GRDP/nguoi)]",
+       x = "",
+       y = "")
+```
+
+
+
+# Non-linear trend regression
+
+
+```{r}
+sigma_trend_sd_log[["sigma.trend"]] %>% 
+  ggplot(aes(x = years, y = sigma.years)) +
+  geom_line(size=1, linetype = "dashed") + 
+  geom_smooth() + 
+  theme_minimal() +
+  labs(subtitle = "SD[Log(GRDP/nguoi)]",
+       x = "",
+       y = "")
+```
+
+
+Note: An increasing dispersion implies a lack of sigma convergence
+
+
+
+
+# The analyses of sigma ang beta convergences use trend regression
+
+
+
+```{r}
+sigma_plot <- rca (grdp$y2018, 2018, grdp[3:7], 2023,
+                   conditions = NULL, sigma.type = "trend", sigma.measure = "cv",
+                   beta.plot = TRUE, beta.plotLine = TRUE, beta.plotX =
+                     "Ln (GRDP/nguoi trung inh)", beta.plotY = "Ln (% tang GRDP/nguoi )",
+                   beta.plotTitle = "Hoi tu Beta GRDP/nguoi giai đoan 2018-2023",
+                   sigma.plot = TRUE, sigma.plotY = "cv cua ln (GRDP/nguoi)",
+                   sigma.plotTitle = "Hội tụ sigma GRDP/nguoi năm 2018-2023")
+sigma_plot
+#
+
+```
+
+
+
+# test if there are average growth differences by mat do doanh nghiep, nsld, FDI, hdi
+
+
+```{r}
+
+# a. Tao dummy variable
+regionaldummies <- to.dummy(grdp$mat_do_dn)
+# b. Creating dummy variables for anh huong cua bien so dn/van dan den hoi tu GRDP/nguoi
+# regionaldummies[,1] = cao (>=1), 
+# regionaldummies[,2] = thap (<1)
+grdp$mat_do_dn_van_ld <- regionaldummies[,2]
+# # #
+converg_grdp <- rca (grdp$y2018, 2018,
+                          grdp[3:7], 2023,
+                          conditions = grdp[c(16, 19, 20, 26)], # 16, 19, 20, 26 la vi tri cua cacs cot "maty_do_dn_van_ld, ....)
+                          sigma.type = "trend")
+  converg_grdp
+
+```
+
+
+
+# Beta convergence: 2018-2023 period
+
+
+## OLS
+
+
+```{r}
+betaconv_ols <- betaconv.ols (grdp$y2018,
+              2018,
+              grdp$y2023,
+              2023,
+              conditions = NULL, 
+              beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid",
+              # output.results = TRUE
+              )
+betaconv_ols
+
+```
+
+
+### Linear beta-convergence regression 
+
+
+```{r}
+# Create a new column ln_initial = log(y2018)
+ln_initial <- grdp %>%
+  mutate(ln_initial = log(y2018))
+
+betaconv_ols[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = grdp$growth)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+theme_minimal() +
+labs(subtitle = "Growth of grdp (%) (2018-2023)",
+   x = "Log of GRDP/nguoi in 2018",
+   y = "Growth ò GRDP/nguoi")
+
+```
+
+
+## NLS
+
+
+```{r}
+betaconv_nls <- betaconv.ols (grdp$y2018,
+              2018,
+              grdp$y2023,
+              2023,
+              conditions = NULL, 
+              beta.plot = TRUE,
+              beta.plotLine = TRUE, 
+              beta.plotLineCol = "red", 
+              beta.plotX = "ln (initial)", 
+              beta.plotY = "growth", 
+              beta.plotTitle = "Beta convergence", 
+              beta.bgrid = TRUE, 
+              beta.bgridType = "solid",
+              # output.results = TRUE
+              )
+betaconv_nls
+
+```
+
+
+
+```{r}
+betaconv_nls[["regdata"]] %>%
+  ggplot(aes(x = ln_initial, y = grdp$growth)) +
+  geom_point() +
+  geom_smooth() +
+  theme_minimal() +
+  labs(subtitle = "Growth of GRDP/nguoi (2018-2023)",
+       x = "Log of GRDP/nguoi nam 2018",
+       y = "")
+```
+
+
+Note: The lack of statistical significance of the beta coefficient implies a lack of beta convergence
+
+
+
+
+# KẾT LUẬN
+
+
+
+
+
+
+
+
+
+
+
+
+
+END.
